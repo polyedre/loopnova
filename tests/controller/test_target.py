@@ -2,13 +2,12 @@
 
 from loopnova.controller import Target
 from unittest import TestCase
-
-from .mock_analyzer import MockAnalyzer
+from unittest.mock import patch
 
 class TargetUnitTests(TestCase):
 
     def test_create_target(self):
-        target = Target()
+        Target()
 
     def test_add_target(self):
         Target().add()
@@ -19,11 +18,20 @@ class TargetUnitTests(TestCase):
     def test_target_merge(self):
         self.assertFalse(Target().exist())
 
-    def test_can_registrer_analyzer(self):
-        Target.register_analyzer(MockAnalyzer)
-        self.assertIn(MockAnalyzer, Target.analyzers)
+    @patch("loopnova.controller.analyzer.Analyzer")
+    def test_can_registrer_analyzer(self, analyzer):
+        Target.register_analyzer(analyzer)
+        self.assertIn(analyzer, Target.analyzers)
 
-    def test_cannot_registrer_analyzer_twice(self):
-        Target.register_analyzer(MockAnalyzer)
-        Target.register_analyzer(MockAnalyzer)
-        self.assertEqual(Target.analyzers.count(MockAnalyzer), 1)
+    @patch("loopnova.controller.analyzer.Analyzer")
+    def test_cannot_registrer_analyzer_twice(self, analyzer):
+        Target.register_analyzer(analyzer)
+        Target.register_analyzer(analyzer)
+        self.assertEqual([ type(a) for a in Target.analyzers].count(type(analyzer)), 1)
+
+    @patch("loopnova.controller.analyzer.Analyzer")
+    def test_registered_analyzer_run_when_add(self, analyzer):
+        Target.register_analyzer(analyzer)
+        self.assertFalse(analyzer.analyze.called)
+        Target().add()
+        self.assertTrue(analyzer.analyze.called)

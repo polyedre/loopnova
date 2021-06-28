@@ -6,7 +6,8 @@ class Target:
     analyzers = []
 
     def add(self):
-        pass
+        for analyzer in Target.analyzers:
+            analyzer.analyze(self)
 
     def exist(self):
         return False
@@ -15,5 +16,5 @@ class Target:
         return self
 
     def register_analyzer(analyzer):
-        if analyzer not in Target.analyzers:
+        if type(analyzer) not in (type(a) for a in Target.analyzers):
             Target.analyzers.append(analyzer)
